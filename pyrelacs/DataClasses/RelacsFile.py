@@ -326,6 +326,27 @@ class RelacsFile(object):
             yield self._load(i)
 
     def select(self, selection=None, **kwargs):
+        """
+        Returns a selection of datasets that match the conditions specified in the kwargs.
+
+        :param selection: A previous selection that can be refined with the additional search patterns.
+        :param kwargs: A dictionary of property-tuples and values. All properties must match.
+        :return: ([metadata], [keys], [data])
+
+        Example:
+        Suppose that the metadata contains 2 fields (duration and frequency) specifying the conditions and these are
+        located in the 'Stimulus' section of the metadata. The fields are thus specified with an n-tuple specifying the
+        path in the metadata tree.
+
+        >>> data_file = pyrelacs.DataClasses.load(trace)
+        >>> durations = x.fields(('Stimulus', 'duration'))
+        >>> frequencies = x.fields(('Stimulus', 'frequency'))
+        >>> for d in durations:
+        >>>     for f in frequencies:
+        >>>         meta, keys, data = x.select({('Stimulus', 'duration'): d, ('Stimulus', 'frequency'): f})
+
+        Note: if you are selecting using a property in the root of the metadata tree, you still have to provide a tuple!
+        """
         ret = self._select(exact_nested_field_match, selection, **kwargs)
         if ret is None:
             return [], [], []
@@ -340,6 +361,11 @@ class RelacsFile(object):
             return ret
 
     def selectall(self):
+        """
+        Select all datasets from the file.
+
+        :return: ([metadata], [keys], [data])
+        """
         metas, keys, datas = list(map(list, list(zip(*self.content))))
         idx = list(range(len(self.content)))
         return self._finalize_selection(metas, keys, datas, idx)
