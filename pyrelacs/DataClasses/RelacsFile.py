@@ -67,6 +67,7 @@ def get_properties(meta, parent=None):
             ret.add(parent + (m,))
     return ret
 
+
 def hierarchy2datablocks(hierarchy, key_factory, filename):
     ret = []
     properties = set()
@@ -77,6 +78,7 @@ def hierarchy2datablocks(hierarchy, key_factory, filename):
         for block in newitems:
             properties.update(get_properties(block.meta))
     return ret, properties
+
 
 def parse_metadata_data_block(block, key_factory, filename, inherited_props=None):
     """
@@ -109,6 +111,7 @@ def parse_metadata_data_block(block, key_factory, filename, inherited_props=None
                 meta=meta,
                 data=block.data
             )]
+
 
 def parse_structure(filename, verbose=False):
     """
@@ -181,6 +184,7 @@ def parse_structure(filename, verbose=False):
                 structure.append(FileRange(start, line_no+1, 'data'))
     return structure, keys
 
+
 def relacs_file_factory(obj, mergetrials=False):
     structure, keys = parse_structure(obj.filename)
     hierarchy = parse_metadata_hierarchy(structure)
@@ -208,6 +212,7 @@ def relacs_file_factory(obj, mergetrials=False):
 
     return obj
 
+
 def get_unique_field(meta, pattern):
     field = meta.matching_fields(pattern)
     if  len(field) > 1:
@@ -217,8 +222,10 @@ def get_unique_field(meta, pattern):
     else:
         return None
 
+
 def get_unique_value(meta, pattern):
     return getattr(meta, get_unique_field(meta, pattern))
+
 
 def get_nested_value(d, k):
     if type(k) is tuple:
@@ -228,6 +235,7 @@ def get_nested_value(d, k):
         return ret
     else:
         return d[k]
+
 
 def get_subkey_key_value_pairs(d, k):
     properties = get_properties(d)
@@ -239,6 +247,7 @@ def get_subkey_key_value_pairs(d, k):
             ret_val.append(get_nested_value(d,key))
 
     return ret_key, ret_val
+
 
 def subkey_field_match(d, selection):
     for k, v in selection.items():
@@ -253,6 +262,7 @@ def subkey_field_match(d, selection):
     else:
         return True
 
+
 def exact_nested_field_match(d, selection):
 
     for k, v in selection.items():
@@ -266,6 +276,7 @@ def exact_nested_field_match(d, selection):
     else:
         return True
 
+
 def get_unique_field(meta, pattern):
     field = meta.matching_fields(pattern)
     if  len(field) > 1:
@@ -275,8 +286,10 @@ def get_unique_field(meta, pattern):
     else:
         return None
 
+
 def get_unique_value(meta, pattern):
     return getattr(meta, get_unique_field(meta, pattern))
+
 
 class RelacsFile(object):
     """
@@ -288,7 +301,7 @@ class RelacsFile(object):
 
     **filename:** the filename the data comes from.
 
-    When a relacs file is instantiated, the data is not actually loaded. This happens lazyly in select where each item
+    When a relacs file is instantiated, the data is not actually loaded. This happens lazily in select where each item
     is loaded when it is requested. Once it is loaded it stays stored in the RelacsFile object.
 
     """
@@ -305,8 +318,6 @@ class RelacsFile(object):
             if isinstance(datas[i], FileRange) or \
                     (type(datas[i]) == list and isinstance(datas[i][0], FileRange)):
                 _, keys[i], datas[i] = self._load(j)
-
-
 
         return metas, keys, datas
 
@@ -328,12 +339,10 @@ class RelacsFile(object):
         else:
             return ret
 
-
     def selectall(self):
         metas, keys, datas = list(map(list, list(zip(*self.content))))
         idx = list(range(len(self.content)))
         return self._finalize_selection(metas, keys, datas, idx)
-
 
     def _select(self, selectionfunc, selection=None, **kwargs):
         if selection is not None:
@@ -350,7 +359,6 @@ class RelacsFile(object):
                 datas.append(data)
                 idx.append(i)
         return self._finalize_selection(metas, keys, datas, idx)
-
 
     def _load(self, item_index, replace=True, loadkey=True):
         meta, key, block = self.content[item_index]
@@ -374,10 +382,9 @@ class RelacsFile(object):
     def __repr__(self):
         return self.__str__()
 
+
 def _merge_stimspike_trials(blocks, filename):
     ret = []
-
-
     tmp = [blocks[0].data]
     first = last = blocks[0].meta['trial']
     key = blocks[0].key
@@ -402,6 +409,7 @@ def _merge_stimspike_trials(blocks, filename):
             meta['trial'] = (first, last + 1)
             ret.append(DataBlock(meta=meta, key=key, data=tmp))
     return ret
+
 
 class SpikeFile(RelacsFile):
     def __init__(self, filename, mergetrials=True):
@@ -428,6 +436,7 @@ class SpikeFile(RelacsFile):
 
         return meta, key, data
 
+
 class StimuliFile(RelacsFile):
     def __init__(self, filename):
         super(StimuliFile, self).__init__(filename)
@@ -439,6 +448,7 @@ class StimuliFile(RelacsFile):
         if replace:
             self.content[item_index] = (meta, key, data)
         return meta, key, data
+
 
 class BeatFile(RelacsFile):
     def __init__(self, filename):
@@ -452,6 +462,7 @@ class BeatFile(RelacsFile):
             self.content[item_index] = (meta, key, data)
         return meta, key, data
 
+
 class TraceFile(RelacsFile):
     def __init__(self, filename):
         super(TraceFile, self).__init__(filename)
@@ -462,6 +473,7 @@ class TraceFile(RelacsFile):
         if replace:
             self.content[item_index] = (meta, key, data)
         return meta, key, data
+
 
 class EventFile(RelacsFile):
     def __init__(self, filename):
@@ -475,6 +487,7 @@ class EventFile(RelacsFile):
             self.content[item_index] = (meta, key, data)
         return meta, key, data
 
+
 class FICurveFile(StimuliFile):
     def __init__(self, filename):
         super(FICurveFile, self).__init__(filename)
@@ -487,9 +500,10 @@ class FICurveFile(StimuliFile):
             self.content[item_index] = (meta, key, data)
         return meta, key, data
 
+
 def read_info_file(file_name):
     """
-    By dr Groovy, acutally.
+    By dr Groovy, actually.
     Reads the info file and returns the stored metadata in a dictionary.
     The dictionary may be nested.
     @param file_name:  The name of the info file.
